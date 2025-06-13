@@ -45,7 +45,9 @@ app.post("/ask", async (req, res) => {
     res.status(500).json({ error: "Erreur lors de la requête à OpenAI." });
   }
 });
-
+app.get("/", (req, res) => {
+  res.send("Serveur opérationnel ✅");
+});
 app.listen(PORT, () => {
   console.log("✅ Serveur en ligne sur le port", PORT);
 });
