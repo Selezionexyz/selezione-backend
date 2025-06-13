@@ -88,6 +88,3 @@ app.post("/generate-image", async (req, res) => {
 app.listen(PORT, () => {
   console.log("✅ Serveur en ligne sur le port", PORT);
 });
-app.listen(PORT, () => {
-  console.log("✅ Serveur en ligne sur le port", PORT);
-});
