@@ -62,14 +62,6 @@ app.get("/test", (req, res) => {
   }
 
   try {
-    const response = await axios.post(
-      "https://api.openai.com/v1/images/generations",
-      {
-        model: "dall-e-3",
-        prompt: prompt,
-        n: 1,
-        size: "1024x1024"
-      },
       {
         headers: {
           Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
