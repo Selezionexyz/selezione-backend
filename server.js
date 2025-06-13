@@ -122,6 +122,51 @@ app.post("/assistant-personnel", async (req, res) => {
     res.status(500).json({ error: "Erreur assistant IA." });
   }
 });
+app.post("/fiche-produit", async (req, res) => {
+  const { nom, matière, couleur, collection, style, publicCible } = req.body;
+
+  if (!nom || !matière || !couleur || !collection || !style || !publicCible) {
+    return res.status(400).json({ error: "Champs manquants." });
+  }
+
+  try {
+    const prompt = `
+Génère une fiche produit professionnelle pour un article de mode luxe avec ces infos :
+- Nom : ${nom}
+- Matière : ${matière}
+- Couleur : ${couleur}
+- Collection : ${collection}
+- Style : ${style}
+- Public cible : ${publicCible}
+
+Utilise un ton élégant, vendeur, et adapté à une fiche e-commerce. 
+    `;
+
+    const response = await axios.post(
+      "https://api.openai.com/v1/chat/completions",
+      {
+        model: "gpt-4-turbo",
+        messages: [
+          { role: "system", content: "Tu es un expert en rédaction e-commerce pour des produits de mode et luxe." },
+          { role: "user", content: prompt }
+        ],
+        temperature: 0.7
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+          "Content-Type": "application/json"
+        }
+      }
+    );
+
+    const fiche = response.data.choices[0].message.content;
+    res.json({ fiche });
+  } catch (error) {
+    console.error("Erreur fiche produit :", error.message);
+    res.status(500).json({ error: "Erreur lors de la génération de la fiche produit." });
+  }
+});
 // 🔽 Ne touche pas à cette ligne, elle doit rester tout en bas
 app.listen(PORT, () => {
   console.log("✅ Serveur en ligne sur le port", PORT);
