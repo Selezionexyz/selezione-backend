@@ -50,6 +50,44 @@ app.get("/", (req, res) => {
 app.get("/test", (req, res) => {
   res.send("✅ Route /test en ligne !");
 });
+// ... ici tout ton code déjà en place : require, app.post("/ask"), app.get("/", etc.)
+
+// 🔽 Ajoute ici le nouveau endpoint pour générer des images
+app.post("/generate-image", async (req, res) => {
+  const { prompt } = req.body;
+  if (!prompt) {
+    return res.status(400).json({ error: "Prompt manquant." });
+  }
+
+  try {
+    const response = await axios.post(
+      "https://api.openai.com/v1/images/generations",
+      {
+        model: "dall-e-3",
+        prompt: prompt,
+        n: 1,
+        size: "1024x1024"
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+          "Content-Type": "application/json"
+        }
+      }
+    );
+
+    const imageUrl = response.data.data[0].url;
+    res.json({ image: imageUrl });
+  } catch (error) {
+    console.error("Erreur génération image :", error.message);
+    res.status(500).json({ error: "Erreur lors de la génération d'image." });
+  }
+});
+
+// 🔽 Ne touche pas à cette ligne, elle doit rester tout en bas
+app.listen(PORT, () => {
+  console.log("✅ Serveur en ligne sur le port", PORT);
+});
 app.listen(PORT, () => {
   console.log("✅ Serveur en ligne sur le port", PORT);
 });
