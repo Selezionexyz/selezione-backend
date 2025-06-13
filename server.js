@@ -53,12 +53,6 @@ app.get("/test", (req, res) => {
 // ... ici tout ton code déjà en place : require, app.post("/ask"), app.get("/", etc.)
 
 // 🔽 Ajoute ici le nouveau endpoint pour générer des images
-app.post("/generate-image", async (req, res) => {
-app.post("/generate-fiche", async (req, res) => {
-  const { prompt } = req.body; // 🔧 CORRECTION ICI
-  if (!prompt || prompt.trim() === "") {
-    return res.status(400).json({ error: "Prompt manquant." });
-  }
 
   // suite de ton code...
 });
