@@ -75,9 +75,8 @@ app.post("/generate-image", async (req, res) => {
         }
       }
     );
-
-    const imageUrl = response.data.data[0].url;
-    res.json({ image: imageUrl });
+console.log("Données reçues :", response.data);
+res.json(response.data);
   } catch (error) {
     console.error("Erreur génération image :", error.message);
     res.status(500).json({ error: "Erreur lors de la génération d'image." });
