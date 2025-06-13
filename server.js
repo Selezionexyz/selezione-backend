@@ -51,7 +51,6 @@ app.get("/test", (req, res) => {
   res.send("✅ Route /test en ligne !");
 });
 // ... ici tout ton code déjà en place : require, app.post("/ask"), app.get("/", etc.)
-    );
 console.log("Données reçues :", response.data);
 res.json(response.data);
   } catch (error) {
