@@ -122,11 +122,6 @@ app.post("/assistant-personnel", async (req, res) => {
     res.status(500).json({ error: "Erreur assistant IA." });
   }
 });
-
-// 🔻 TOUJOURS EN DERNIER :
-app.listen(PORT, () => {
-  console.log("✅ Serveur en ligne sur le port", PORT);
-});
 // 🔽 Ne touche pas à cette ligne, elle doit rester tout en bas
 app.listen(PORT, () => {
   console.log("✅ Serveur en ligne sur le port", PORT);
