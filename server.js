@@ -51,14 +51,6 @@ app.get("/test", (req, res) => {
   res.send("✅ Route /test en ligne !");
 });
 // ... ici tout ton code déjà en place : require, app.post("/ask"), app.get("/", etc.)
-
-  try {
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-          "Content-Type": "application/json"
-        }
-      }
     );
 console.log("Données reçues :", response.data);
 res.json(response.data);
