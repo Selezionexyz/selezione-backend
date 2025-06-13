@@ -124,7 +124,10 @@ app.post("/assistant-personnel", async (req, res) => {
 });
 app.post("/fiche-produit", async (req, res) => {
   const { nom, matière, couleur, collection, style, publicCible } = req.body;
-
+if (!prompt || prompt.trim() === "") {
+  return res.status(400).json({ error: "Prompt vide ou invalide." });
+}
+console.log("Prompt envoyé à GPT :", prompt);
   if (!nom || !matière || !couleur || !collection || !style || !publicCible) {
     return res.status(400).json({ error: "Champs manquants." });
   }
