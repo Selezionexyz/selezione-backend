@@ -39,7 +39,7 @@ app.post("/ask", async (req, res) => {
     );
     const answer = response.data.choices[0].message.content;
     res.json({ response: answer });
-  } catch (error) {
+  }} catch (error) {
     console.error("Erreur:", error.message);
     res.status(500).json({ error: "Erreur lors de la requête à OpenAI." });
   }
