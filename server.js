@@ -44,7 +44,6 @@ app.post("/ask", async (req, res) => {
     res.status(500).json({ error: "Erreur lors de la requête à OpenAI." });
   }
 });
-Fix: remove Git commands from cod
 app.get("/", (req, res) => {
   res.send("✅ Backend Selezione est opérationnel !");
 });
