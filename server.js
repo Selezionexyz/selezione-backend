@@ -47,6 +47,9 @@ app.post("/ask", async (req, res) => {
 app.get("/", (req, res) => {
   res.send("✅ Backend Selezione est opérationnel !");
 });
+app.get("/test", (req, res) => {
+  res.send("✅ Route /test en ligne !");
+});
 app.listen(PORT, () => {
   console.log("✅ Serveur en ligne sur le port", PORT);
 });
