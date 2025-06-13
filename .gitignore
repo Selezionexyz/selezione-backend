@@ -1,0 +1,3 @@
+# Empêche d'ajouter les fichiers sensibles ou inutiles
+.env
+node_modules/
