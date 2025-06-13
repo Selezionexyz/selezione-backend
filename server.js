@@ -13,7 +13,9 @@ app.post("/ask", async (req, res) => {
   if (!question) {
     return res.status(400).json({ error: "Question manquante." });
   }
-
+git add server.js
+git commit -m "Fix: Ajout d'une seule route GET / pour test Render"
+git push
   try {
     const response = await axios.post(
       "https://api.openai.com/v1/chat/completions",
