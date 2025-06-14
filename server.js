@@ -1,257 +1,224 @@
 const express = require('express');
 const axios = require('axios');
+const cors = require('cors');
 require('dotenv').config();
 
 const app = express();
+app.use(cors());
 app.use(express.json());
 
-// Middleware pour vérifier la clé API
-const openaiHeaders = {
-  Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-  'Content-Type': 'application/json',
-};
-
-// 1. Infos Marque IA
+// 1. Infos Marque IA (GPT-4 Turbo)
 app.post('/infos-marque', async (req, res) => {
   const { marque } = req.body;
   try {
-    const response = await axios.post(
-      'https://api.openai.com/v1/chat/completions',
-      {
-        model: 'gpt-4-turbo',
-        messages: [
-          {
-            role: 'system',
-            content: "Tu es un expert en histoire et actualité des marques de luxe.",
-          },
-          {
-            role: 'user',
-            content: `Donne-moi une fiche complète sur la marque : ${marque}`,
-          },
-        ],
-      },
-      { headers: openaiHeaders }
-    );
-    res.json({ reponse: response.data.choices[0].message.content });
+    const response = await axios.post('https://api.openai.com/v1/chat/completions', {
+      model: "gpt-4-turbo",
+      messages: [
+        { role: "system", content: "Tu es un expert en histoire des marques de luxe." },
+        { role: "user", content: `Donne-moi une présentation complète de la marque ${marque}` }
+      ]
+    }, {
+      headers: {
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    res.json({ info: response.data.choices[0].message.content });
   } catch (error) {
-    res.status(500).json({ error: 'Erreur Infos Marque IA' });
+    console.error("Erreur Infos Marque:", error.message);
+    res.status(500).json({ error: "Erreur lors de la récupération des infos marque." });
   }
 });
 
-// 2. Stratégie Marque IA
+// 2. Stratégie Marque IA (GPT-4 Turbo)
 app.post('/strategie-marque', async (req, res) => {
   const { objectif } = req.body;
   try {
-    const response = await axios.post(
-      'https://api.openai.com/v1/chat/completions',
-      {
-        model: 'gpt-4-turbo',
-        messages: [
-          {
-            role: 'system',
-            content: "Tu es un consultant stratégie pour marques de mode et luxe.",
-          },
-          {
-            role: 'user',
-            content: `Élabore une stratégie de marque pour : ${objectif}`,
-          },
-        ],
-      },
-      { headers: openaiHeaders }
-    );
+    const response = await axios.post('https://api.openai.com/v1/chat/completions', {
+      model: "gpt-4-turbo",
+      messages: [
+        { role: "system", content: "Tu es un expert en stratégie marketing pour le secteur du luxe." },
+        { role: "user", content: `Propose-moi une stratégie complète pour : ${objectif}` }
+      ]
+    }, {
+      headers: {
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
     res.json({ strategie: response.data.choices[0].message.content });
   } catch (error) {
-    res.status(500).json({ error: 'Erreur Stratégie Marque IA' });
+    console.error("Erreur stratégie:", error.message);
+    res.status(500).json({ error: "Erreur lors de la génération de la stratégie." });
   }
 });
 
-// 3. Fiche Produit IA
+// 3. Fiche Produit IA (GPT-4 Turbo)
 app.post('/fiche-produit', async (req, res) => {
   const { nomProduit } = req.body;
   try {
-    const response = await axios.post(
-      'https://api.openai.com/v1/chat/completions',
-      {
-        model: 'gpt-4-turbo',
-        messages: [
-          {
-            role: 'system',
-            content: "Tu es un expert en rédaction de fiches produits pour le luxe.",
-          },
-          {
-            role: 'user',
-            content: `Rédige une fiche produit complète pour : ${nomProduit}`,
-          },
-        ],
-      },
-      { headers: openaiHeaders }
-    );
+    const response = await axios.post('https://api.openai.com/v1/chat/completions', {
+      model: "gpt-4-turbo",
+      messages: [
+        { role: "system", content: "Tu es un expert en création de fiche produit pour le luxe." },
+        { role: "user", content: `Crée une fiche produit complète pour : ${nomProduit}` }
+      ]
+    }, {
+      headers: {
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
     res.json({ fiche: response.data.choices[0].message.content });
   } catch (error) {
-    res.status(500).json({ error: 'Erreur Fiche Produit IA' });
+    console.error("Erreur fiche produit:", error.message);
+    res.status(500).json({ error: "Erreur lors de la création de la fiche produit." });
   }
 });
 
-// 4. Actualité du Luxe (avec GPT-4 turbo, pas API news pour l’instant)
-app.post('/actualites-luxe', async (req, res) => {
-  const { sujet } = req.body;
+// 4. Actualité du Luxe (API réelle)
+app.get('/actualites-luxe', async (req, res) => {
   try {
-    const response = await axios.post(
-      'https://api.openai.com/v1/chat/completions',
-      {
-        model: 'gpt-4-turbo',
-        messages: [
-          {
-            role: 'system',
-            content: "Tu es un journaliste IA expert dans les tendances et actualités du luxe.",
-          },
-          {
-            role: 'user',
-            content: `Fais-moi un résumé d'actualité sur : ${sujet}`,
-          },
-        ],
-      },
-      { headers: openaiHeaders }
-    );
-    res.json({ actualites: response.data.choices[0].message.content });
+    const response = await axios.get(`https://newsapi.org/v2/everything?q=luxe%20mode&apiKey=${process.env.NEWS_API_KEY}&language=fr`);
+    const titres = response.data.articles.map(article => ({
+      title: article.title,
+      url: article.url,
+      image: article.urlToImage
+    }));
+    res.json({ actualites: titres });
   } catch (error) {
-    res.status(500).json({ error: 'Erreur Actus Luxe IA' });
+    console.error("Erreur actu luxe:", error.message);
+    res.status(500).json({ error: "Erreur actualités luxe." });
   }
 });
 
-// 5. Chat IA Selezione
+// 5. Chat IA Selezione (GPT-4 Turbo)
 app.post('/chat', async (req, res) => {
   const { message } = req.body;
   try {
-    const response = await axios.post(
-      'https://api.openai.com/v1/chat/completions',
-      {
-        model: 'gpt-4-turbo',
-        messages: [
-          {
-            role: 'system',
-            content: "Tu es un assistant mode et luxe. Donne des réponses complètes, utiles et à jour.",
-          },
-          {
-            role: 'user',
-            content: message,
-          },
-        ],
-      },
-      { headers: openaiHeaders }
-    );
+    const response = await axios.post('https://api.openai.com/v1/chat/completions', {
+      model: "gpt-4-turbo",
+      messages: [
+        { role: "system", content: "Tu es un assistant mode de luxe très compétent." },
+        { role: "user", content: message }
+      ]
+    }, {
+      headers: {
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
     res.json({ reponse: response.data.choices[0].message.content });
   } catch (error) {
-    res.status(500).json({ error: 'Erreur Chat IA' });
+    console.error("Erreur chat:", error.message);
+    res.status(500).json({ error: "Erreur du chat IA." });
   }
 });
 
-// 6. Générateur d'image
+// 6. Générateur d’image (DALL·E 3)
 app.post('/generate-image', async (req, res) => {
   const { prompt } = req.body;
   try {
-    const response = await axios.post(
-      'https://api.openai.com/v1/images/generations',
-      {
-        model: 'dall-e-3',
-        prompt: prompt,
-        n: 1,
-        size: '1024x1024',
-      },
-      { headers: openaiHeaders }
-    );
+    const response = await axios.post('https://api.openai.com/v1/images/generations', {
+      model: "dall-e-3",
+      prompt,
+      n: 1,
+      size: "1024x1024"
+    }, {
+      headers: {
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
     res.json({ image: response.data.data[0].url });
   } catch (error) {
-    res.status(500).json({ error: 'Erreur génération image' });
+    console.error("Erreur image:", error.message);
+    res.status(500).json({ error: "Erreur génération image." });
   }
 });
 
-// 7. Guide Prêt-à-Porter Luxe
+// 7. Guide Prêt-à-Porter Luxe (GPT-4 Turbo)
 app.post('/guide-luxe', async (req, res) => {
   const { theme } = req.body;
   try {
-    const response = await axios.post(
-      'https://api.openai.com/v1/chat/completions',
-      {
-        model: 'gpt-4-turbo',
-        messages: [
-          {
-            role: 'system',
-            content: "Tu es un expert dans le prêt-à-porter de luxe, outlet et seconde main.",
-          },
-          {
-            role: 'user',
-            content: `Explique moi en détail : ${theme}`,
-          },
-        ],
-      },
-      { headers: openaiHeaders }
-    );
+    const response = await axios.post('https://api.openai.com/v1/chat/completions', {
+      model: "gpt-4-turbo",
+      messages: [
+        { role: "system", content: "Tu es un expert du prêt-à-porter de luxe." },
+        { role: "user", content: `Donne un guide complet pour : ${theme}` }
+      ]
+    }, {
+      headers: {
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
     res.json({ guide: response.data.choices[0].message.content });
   } catch (error) {
-    res.status(500).json({ error: 'Erreur Guide Luxe' });
+    console.error("Erreur guide luxe:", error.message);
+    res.status(500).json({ error: "Erreur lors de la génération du guide." });
   }
 });
 
-// 8. Startups & Incubateurs Marques
+// 8. Startups Marques (GPT-4 Turbo)
 app.post('/startups-marques', async (req, res) => {
-  const { secteur } = req.body;
+  const { domaine } = req.body;
   try {
-    const response = await axios.post(
-      'https://api.openai.com/v1/chat/completions',
-      {
-        model: 'gpt-4-turbo',
-        messages: [
-          {
-            role: 'system',
-            content: "Tu es un analyste IA des marques émergentes et startups.",
-          },
-          {
-            role: 'user',
-            content: `Fais une liste et analyse de startups dans : ${secteur}`,
-          },
-        ],
-      },
-      { headers: openaiHeaders }
-    );
+    const response = await axios.post('https://api.openai.com/v1/chat/completions', {
+      model: "gpt-4-turbo",
+      messages: [
+        { role: "system", content: "Tu es un expert en incubateurs et startups du luxe." },
+        { role: "user", content: `Donne des idées ou marques dans le domaine : ${domaine}` }
+      ]
+    }, {
+      headers: {
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
     res.json({ startups: response.data.choices[0].message.content });
   } catch (error) {
-    res.status(500).json({ error: 'Erreur Startups Marques' });
+    console.error("Erreur startup:", error.message);
+    res.status(500).json({ error: "Erreur lors de la génération des marques." });
   }
 });
 
-// 9. Générateur de Contenu (posts, articles, prompts visuels, etc.)
-app.post('/generateur-contenu', async (req, res) => {
-  const { type, sujet } = req.body;
+// 9. Personal Shopper / Sélectionneur IA (GPT-4 Turbo)
+app.post('/personal-shopper', async (req, res) => {
+  const { preference } = req.body;
   try {
-    const response = await axios.post(
-      'https://api.openai.com/v1/chat/completions',
-      {
-        model: 'gpt-4-turbo',
-        messages: [
-          {
-            role: 'system',
-            content: `Tu es un créateur de contenu IA spécialisé en luxe.`,
-          },
-          {
-            role: 'user',
-            content: `Crée un ${type} sur : ${sujet}`,
-          },
-        ],
-      },
-      { headers: openaiHeaders }
-    );
-    res.json({ contenu: response.data.choices[0].message.content });
+    const response = await axios.post('https://api.openai.com/v1/chat/completions', {
+      model: "gpt-4-turbo",
+      messages: [
+        { role: "system", content: "Tu es un personal shopper spécialisé dans le luxe et le digital fashion." },
+        { role: "user", content: `Trouve des suggestions selon cette préférence : ${preference}` }
+      ]
+    }, {
+      headers: {
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    res.json({ suggestions: response.data.choices[0].message.content });
   } catch (error) {
-    res.status(500).json({ error: 'Erreur Générateur de contenu IA' });
+    console.error("Erreur personal shopper:", error.message);
+    res.status(500).json({ error: "Erreur dans le service personal shopper." });
   }
 });
 
-// Test de disponibilité
+// Route de base
 app.get('/', (req, res) => {
-  res.send('✅ API Selezione opérationnelle avec GPT-4 Turbo');
+  res.send('API Selezione active et prête 🖤');
 });
 
-// Lancer le serveur
+// Port
 const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => console.log(`🚀 Serveur actif sur le port ${PORT}`));
+app.listen(PORT, () => console.log(`✅ Serveur Selezione lancé sur le port ${PORT}`));
