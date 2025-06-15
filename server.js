@@ -97,8 +97,7 @@ app.post('/actus-luxe-ia', async (req, res) => {
       imageUrl: image.data.data[0].url
     });
 
-  } catch (error) {
-    console.error("Erreur actu IA :", error.message);
+  console.error("Erreur actu IA complète :", error.response?.data || error.message || error);
     res.status(500).json({ error: "Erreur génération contenu IA." });
   }
 });
