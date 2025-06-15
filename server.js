@@ -198,6 +198,9 @@ Donne une analyse concise : est-ce un bon prix ? Bon moment pour vendre ? Consei
     res.status(500).json({ error: "Erreur estimation IA." });
   }
 });
+app.get('/', (req, res) => {
+  res.send("Bienvenue sur l'API SELEZIONE ✨");
+});
 // --------------------- LANCEMENT DU SERVEUR ---------------------
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
