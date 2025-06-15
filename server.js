@@ -1,5 +1,3 @@
-// server.js
-
 const express = require('express');
 const axios = require('axios');
 const cors = require('cors');
@@ -12,7 +10,7 @@ app.use(express.json());
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const NEWS_API_KEY = process.env.NEWS_API_KEY;
 
-// 🔹 MODULE 1 : Assistant Luxe IA (chat, marque, style)
+// MODULE 1 : Assistant Luxe IA (chat, marque, style)
 app.post('/assistant-luxe', async (req, res) => {
   const { message, mode } = req.body;
 
@@ -27,7 +25,7 @@ app.post('/assistant-luxe', async (req, res) => {
       break;
     case 'chat':
     default:
-      systemPrompt = "Tu es un assistant IA spécialisé dans le luxe. Réponds à toute question sur les marques, les tendances, les produits, et le business luxe.";
+      systemPrompt = "Tu es un assistant expert en prêt-à-porter luxe, stratégie mode et analyse tendance.";
       break;
   }
 
@@ -51,18 +49,28 @@ app.post('/assistant-luxe', async (req, res) => {
 
     res.json({ reponse: response.data.choices[0].message.content });
   } catch (error) {
-    console.error("Erreur Assistant Luxe:", error.message);
-    res.status(500).json({ error: "Erreur Assistant Luxe IA." });
+    console.error("Erreur assistant luxe:", error.message);
+    res.status(500).json({ error: "Erreur dans l'assistant luxe." });
   }
 });
 
-// 🔹 MODULE 2 : Actus Luxe + Générateur de contenu
+// MODULE 2 : Actualités Luxe + Générateur de contenu
 app.get('/actus-luxe', async (req, res) => {
-  try {
-    const response = await axios.get(
-      `https://newsapi.org/v2/everything?q=luxe%20mode&language=fr&sortBy=publishedAt&apiKey=${NEWS_API_KEY}`
-    );
+  const { marque, mois } = req.query;
 
+  try {
+    let query = 'luxe mode';
+    if (marque) {
+      query += ` ${marque}`;
+    }
+
+    const from = mois ? `${mois}-01` : '';
+    const to = mois ? `${mois}-28` : '';
+
+    const url = `https://newsapi.org/v2/everything?q=${encodeURIComponent(query)}&language=fr&sortBy=publishedAt&apiKey=${NEWS_API_KEY}`;
+    const fullUrl = mois ? `${url}&from=${from}&to=${to}` : url;
+
+    const response = await axios.get(fullUrl);
     const actualites = response.data.articles.map(article => ({
       title: article.title,
       url: article.url,
@@ -78,127 +86,76 @@ app.get('/actus-luxe', async (req, res) => {
   }
 });
 
-app.post('/generate-image', async (req, res) => {
-  const { prompt } = req.body;
-  try {
-    const response = await axios.post(
-      'https://api.openai.com/v1/images/generations',
-      {
-        model: "dall-e-3",
-        prompt,
-        n: 1,
-        size: "1024x1024"
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${OPENAI_API_KEY}`,
-          'Content-Type': 'application/json'
-        }
-      }
-    );
-
-    res.json({ image: response.data.data[0].url });
-  } catch (error) {
-    console.error("Erreur image:", error.message);
-    res.status(500).json({ error: "Erreur génération d'image." });
-  }
-});
-
-// (Optionnel futur : générateur texte contenu IA)
-// app.post('/generate-content', async (req, res) => { ... })
-
-// 🔹 MODULE 3 : Style & Produit IA (fiche produit, stratégie, personal shopper)
+// MODULE 3 : Fiche Produit IA + Assistant Style IA + Startups IA
 app.post('/fiche-produit', async (req, res) => {
   const { nomProduit } = req.body;
-
   try {
-    const response = await axios.post(
-      'https://api.openai.com/v1/chat/completions',
-      {
-        model: "gpt-4-turbo",
-        messages: [
-          { role: "system", content: "Tu es un expert en rédaction de fiches produit pour le e-commerce de luxe. Rédige un texte vendeur, optimisé SEO." },
-          { role: "user", content: `Crée une fiche produit complète pour : ${nomProduit}` }
-        ]
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${OPENAI_API_KEY}`,
-          'Content-Type': 'application/json'
-        }
+    const response = await axios.post('https://api.openai.com/v1/chat/completions', {
+      model: "gpt-4-turbo",
+      messages: [
+        { role: "system", content: "Tu es un expert en création de fiches produit luxe optimisées SEO." },
+        { role: "user", content: `Crée une fiche produit professionnelle et optimisée pour : ${nomProduit}` }
+      ]
+    }, {
+      headers: {
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
+        'Content-Type': 'application/json'
       }
-    );
+    });
 
     res.json({ fiche: response.data.choices[0].message.content });
   } catch (error) {
     console.error("Erreur fiche produit:", error.message);
-    res.status(500).json({ error: "Erreur création fiche produit." });
+    res.status(500).json({ error: "Erreur génération fiche produit." });
   }
 });
 
-app.post('/strategie-marque', async (req, res) => {
-  const { objectif } = req.body;
-
+app.post('/style-reco', async (req, res) => {
+  const { preferences } = req.body;
   try {
-    const response = await axios.post(
-      'https://api.openai.com/v1/chat/completions',
-      {
-        model: "gpt-4-turbo",
-        messages: [
-          { role: "system", content: "Tu es un expert en stratégie business pour les marques de luxe. Propose des plans marketing." },
-          { role: "user", content: `Propose une stratégie pour : ${objectif}` }
-        ]
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${OPENAI_API_KEY}`,
-          'Content-Type': 'application/json'
-        }
+    const response = await axios.post('https://api.openai.com/v1/chat/completions', {
+      model: "gpt-4-turbo",
+      messages: [
+        { role: "system", content: "Tu es un styliste expert pour la mode de luxe." },
+        { role: "user", content: `Fais-moi une recommandation de style avec ces préférences : ${preferences}` }
+      ]
+    }, {
+      headers: {
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
+        'Content-Type': 'application/json'
       }
-    );
+    });
 
-    res.json({ strategie: response.data.choices[0].message.content });
+    res.json({ style: response.data.choices[0].message.content });
   } catch (error) {
-    console.error("Erreur stratégie:", error.message);
-    res.status(500).json({ error: "Erreur génération stratégie." });
+    console.error("Erreur style:", error.message);
+    res.status(500).json({ error: "Erreur dans la recommandation de style." });
   }
 });
 
-app.post('/personal-shopper', async (req, res) => {
-  const { preference } = req.body;
-
+app.post('/startups-marques', async (req, res) => {
+  const { domaine } = req.body;
   try {
-    const response = await axios.post(
-      'https://api.openai.com/v1/chat/completions',
-      {
-        model: "gpt-4-turbo",
-        messages: [
-          { role: "system", content: "Tu es un personal shopper IA spécialisé dans le luxe. Propose des idées de looks ou de pièces selon les goûts, budget, occasion." },
-          { role: "user", content: `Voici les préférences : ${preference}` }
-        ]
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${OPENAI_API_KEY}`,
-          'Content-Type': 'application/json'
-        }
+    const response = await axios.post('https://api.openai.com/v1/chat/completions', {
+      model: "gpt-4-turbo",
+      messages: [
+        { role: "system", content: "Tu es un expert en incubateurs et startups dans la mode et le luxe." },
+        { role: "user", content: `Donne-moi des idées de startups et jeunes marques dans : ${domaine}` }
+      ]
+    }, {
+      headers: {
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
+        'Content-Type': 'application/json'
       }
-    );
+    });
 
-    res.json({ suggestions: response.data.choices[0].message.content });
+    res.json({ startups: response.data.choices[0].message.content });
   } catch (error) {
-    console.error("Erreur personal shopper:", error.message);
-    res.status(500).json({ error: "Erreur personal shopper IA." });
+    console.error("Erreur startups marques:", error.message);
+    res.status(500).json({ error: "Erreur dans la génération des idées startups." });
   }
 });
 
-// 🔄 Route de test
-app.get('/', (req, res) => {
-  res.send('🚀 API SELEZIONE active – IA Luxe prête !');
-});
-
-// 🔊 Lancement serveur
+// Port
 const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => {
-  console.log(`✅ Serveur Selezione lancé sur http://localhost:${PORT}`);
-});
+app.listen(PORT, () => console.log(`✅ Serveur Selezione lancé sur le port ${PORT}`));
