@@ -49,6 +49,7 @@ app.post('/assistant-luxe', async (req, res) => {
 // --------------------- MODULE 2 : ACTUALITÉ IA + IMAGE ---------------------
 app.post('/actus-luxe-ia', async (req, res) => {
   const { sujet, type } = req.body;
+
   let prompt;
 
   switch (type) {
@@ -68,8 +69,14 @@ app.post('/actus-luxe-ia', async (req, res) => {
     const completion = await axios.post("https://api.openai.com/v1/chat/completions", {
       model: "gpt-4-turbo",
       messages: [
-        { role: "system", content: "Tu es un journaliste expert en luxe et prêt-à-porter. Tu rédiges des contenus captivants." },
-        { role: "user", content: prompt }
+        {
+          role: "system",
+          content: "Tu es un journaliste expert en luxe et prêt-à-porter. Tu rédiges des contenus captivants."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
       ]
     }, {
       headers: {
@@ -97,7 +104,8 @@ app.post('/actus-luxe-ia', async (req, res) => {
       imageUrl: image.data.data[0].url
     });
 
-  console.error("Erreur actu IA complète :", error.response?.data || error.message || error);
+  } catch (error) {
+    console.error("Erreur actu IA complète :", error.response?.data || error.message || error);
     res.status(500).json({ error: "Erreur génération contenu IA." });
   }
 });
