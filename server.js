@@ -156,7 +156,48 @@ app.post('/fiche-produit', async (req, res) => {
     res.status(500).json({ error: "Erreur fiche produit." });
   }
 });
+// --------------------- MODULE 4 : ESTIMATEUR PRIX LUXE ---------------------
+app.post('/estimateur-luxe', async (req, res) => {
+  const { produit } = req.body;
 
+  // Simulation temporaire de données récupérées (scraping à venir)
+  const donnees = {
+    prixMin: 210,
+    prixMax: 480,
+    prixMoyen: 350
+  };
+
+  const prompt = `Voici les données de revente pour "${produit}" sur Vinted et Vestiaire Collective :
+  - Prix minimum : ${donnees.prixMin} €
+  - Prix maximum : ${donnees.prixMax} €
+  - Prix moyen observé : ${donnees.prixMoyen} €
+
+Donne une analyse concise : est-ce un bon prix ? Bon moment pour vendre ? Conseils pratiques.`;
+
+  try {
+    const ia = await axios.post("https://api.openai.com/v1/chat/completions", {
+      model: "gpt-4-turbo",
+      messages: [
+        { role: "system", content: "Tu es un expert en estimation de prix et revente de produits de luxe sur Vinted, Vestiaire Collective et eBay." },
+        { role: "user", content: prompt }
+      ]
+    }, {
+      headers: {
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        "Content-Type": "application/json"
+      }
+    });
+
+    res.json({
+      prixMin: donnees.prixMin,
+      prixMax: donnees.prixMax,
+      prixMoyen: donnees.prixMoyen,
+      analyse: ia.data.choices[0].message.content
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Erreur estimation IA." });
+  }
+});
 // --------------------- LANCEMENT DU SERVEUR ---------------------
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
