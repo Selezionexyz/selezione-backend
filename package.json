@@ -1,15 +1,19 @@
 {
-  "name": "selezione-ia-backend",
+  "name": "selezione-backend",
   "version": "1.0.0",
-  "description": "Serveur Node.js pour SELEZIONE",
+  "description": "Serveur backend pour SELEZIONE, plateforme luxe IA",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
+  "keywords": ["luxe", "openai", "assistant", "ia", "mode", "ecommerce"],
+  "author": "SELEZIONE",
+  "license": "MIT",
   "dependencies": {
-    "axios": "^1.6.7",
-    "dotenv": "^16.3.1",
-    "express": "^4.18.2",
+    "axios": "^1.6.0",
     "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "xlsx": "^0.18.5"
   }
 }
