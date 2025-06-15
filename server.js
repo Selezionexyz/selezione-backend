@@ -274,6 +274,55 @@ app.post('/actus-luxe-date-rss', async (req, res) => {
     res.status(500).json({ error: "Erreur actus-mode-date." });
   }
 });
+app.post('/rss-luxe', async (req, res) => {
+  const { sujet, date } = req.body;
+  const formattedDate = date ? new Date(date).toISOString().split('T')[0] : null;
+  let feedContent = '';
+
+  try {
+    const parser = new RSSParser();
+    const feeds = await Promise.all([
+      parser.parseURL("https://www.vogue.fr/rss.xml"),
+      parser.parseURL("https://www.gqmagazine.fr/rss.xml"),
+      parser.parseURL("https://www.lofficiel.com/feed")
+    ]);
+
+    const allItems = feeds.flatMap(feed => feed.items || []);
+    const filtered = allItems.filter(item => {
+      const pubDate = item.pubDate ? new Date(item.pubDate).toISOString().split('T')[0] : '';
+      const matchesDate = !formattedDate || pubDate === formattedDate;
+      const matchesSujet = !sujet || item.title.toLowerCase().includes(sujet.toLowerCase());
+      return matchesDate && matchesSujet;
+    });
+
+    if (filtered.length > 0) {
+      const articles = filtered.map(a => `📰 ${a.title}\n🔗 ${a.link}`).join('\n\n');
+      return res.json({ contenu: articles });
+    }
+
+    // Fallback GPT-4 si aucun article RSS
+    const aiResponse = await axios.post("https://api.openai.com/v1/chat/completions", {
+      model: "gpt-4-turbo",
+      messages: [
+        { role: "system", content: "Tu es un journaliste expert en luxe et prêt-à-porter." },
+        { role: "user", content: sujet 
+            ? `Donne-moi les actualités récentes ou du jour concernant : ${sujet}`
+            : "Génère un résumé des actualités du jour dans le secteur du luxe, mode et prêt-à-porter." }
+      ]
+    }, {
+      headers: {
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    res.json({ contenu: aiResponse.data.choices[0].message.content });
+
+  } catch (error) {
+    console.error("Erreur RSS luxe :", error.message || error);
+    res.status(500).json({ error: "Erreur génération d’actualités." });
+  }
+});
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Serveur SELEZIONE lancé sur le port ${PORT}`);
