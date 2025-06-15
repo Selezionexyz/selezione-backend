@@ -83,6 +83,7 @@ app.post('/generate-image', async (req, res) => {
     res.status(500).json({ error: "Erreur image IA" });
   }
 });
+
 // --------------------- MODULE 3 : ASSISTANT STYLE + FICHE PRODUIT ---------------------
 app.post('/assistant-style', async (req, res) => {
   const { message } = req.body;
@@ -130,33 +131,6 @@ app.post('/fiche-produit', async (req, res) => {
   }
 });
 
-// --------------------- MODULE 4 : SOURCING FOURNISSEURS VIA FICHIER ---------------------
-const upload = multer({ storage: multer.memoryStorage() });
-
-app.post('/sourcing-fournisseurs', upload.single('fichier'), (req, res) => {
-  try {
-    const fichier = req.file;
-
-    if (!fichier) {
-      return res.status(400).json({ error: "Aucun fichier reçu." });
-    }
-
-    const workbook = xlsx.read(fichier.buffer, { type: 'buffer' });
-    const sheetName = workbook.SheetNames[0];
-    const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
-
-    const resume = data.map((ligne, index) => ({
-      fournisseur: ligne.Fournisseur || `Fournisseur ${index + 1}`,
-      produits: ligne.Produits || "Non spécifié",
-      prix: ligne.Prix || "Non précisé"
-    }));
-
-    res.json({ resume });
-  } catch (error) {
-    console.error("Erreur sourcing:", error.message);
-    res.status(500).json({ error: "Erreur analyse fichier sourcing." });
-  }
-});
 // --------------------- MODULE 5 : EXPLORATEUR LUXE / STARTUPS INNOVATION ---------------------
 app.post('/explorateur-luxe', async (req, res) => {
   const { secteur } = req.body;
@@ -244,7 +218,7 @@ app.get('/dashboard-data', async (req, res) => {
   }
 });
 
-// --------------------- MODULE 9 : SCRAPER DE PRIX LUXE (demo statique) ---------------------
+// --------------------- MODULE 9 : SCRAPER DE PRIX LUXE (statique) ---------------------
 app.get('/scraper-vinted', async (req, res) => {
   try {
     const donnees = [
@@ -257,4 +231,10 @@ app.get('/scraper-vinted', async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: "Erreur scraper." });
   }
+});
+
+// --------------------- LANCEMENT DU SERVEUR ---------------------
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`🚀 Serveur SELEZIONE lancé sur le port ${PORT}`);
 });
