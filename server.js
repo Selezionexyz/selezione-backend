@@ -1,4 +1,4 @@
-// --------------------- IMPORTS ---------------------
+z// --------------------- IMPORTS ---------------------
 const express = require('express');
 const axios = require('axios');
 const cors = require('cors');
@@ -200,6 +200,64 @@ Donne une analyse concise : est-ce un bon prix ? Bon moment pour vendre ? Consei
 });
 app.get('/', (req, res) => {
   res.send("Bienvenue sur l'API SELEZIONE ✨");
+});
+app.post('/estimation-luxe', async (req, res) => {
+  const { description } = req.body;
+
+  try {
+    const response = await axios.post("https://api.openai.com/v1/chat/completions", {
+      model: "gpt-4-turbo",
+      messages: [
+        {
+          role: "system",
+          content: "Tu es un expert en estimation de prix pour les vêtements et accessoires de luxe (Vinted, Vestiaire Collective, etc)."
+        },
+        {
+          role: "user",
+          content: `Donne une estimation de prix réaliste pour : ${description}`
+        }
+      ]
+    }, {
+      headers: {
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    res.json({ estimation: response.data.choices[0].message.content });
+  } catch (error) {
+    console.error("Erreur estimation :", error.message);
+    res.status(500).json({ error: "Erreur lors de l'estimation." });
+  }
+});
+app.post('/comparateur-luxe', async (req, res) => {
+  const { produit } = req.body;
+
+  try {
+    const response = await axios.post("https://api.openai.com/v1/chat/completions", {
+      model: "gpt-4-turbo",
+      messages: [
+        {
+          role: "system",
+          content: "Tu es un comparateur de plateformes e-commerce luxe. Tu analyses les différences entre Vinted, Vestiaire Collective, etc."
+        },
+        {
+          role: "user",
+          content: `Compare les plateformes de revente pour : ${produit}`
+        }
+      ]
+    }, {
+      headers: {
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    res.json({ comparaison: response.data.choices[0].message.content });
+  } catch (error) {
+    console.error("Erreur comparateur :", error.message);
+    res.status(500).json({ error: "Erreur lors de la comparaison." });
+  }
 });
 // --------------------- LANCEMENT DU SERVEUR ---------------------
 const PORT = process.env.PORT || 3000;
