@@ -1,6 +1,7 @@
 {
-  "name": "selezione-server",
+  "name": "selezione-ia-backend",
   "version": "1.0.0",
+  "description": "Serveur Node.js pour SELEZIONE IA (Assistant Luxe, Actus & Style)",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
