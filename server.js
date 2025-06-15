@@ -231,7 +231,49 @@ app.post('/comparateur-luxe', async (req, res) => {
 app.get('/', (req, res) => {
   res.send("Bienvenue sur l'API SELEZIONE ✨");
 });
+// ✅ MODULE : Actus luxe par date + RSS
+app.post('/actus-luxe-date-rss', async (req, res) => {
+  const { date, sujet } = req.body;
+  const prompt = `Donne-moi un résumé des actualités du ${date} liées au luxe ou à la mode, avec focus : ${sujet || 'global'}.`;
 
+  try {
+    // 1️⃣ Génération GPT-4
+    const gpt = await axios.post("https://api.openai.com/v1/chat/completions", {
+      model: "gpt-4-turbo",
+      messages: [
+        { role: "system", content: "Journaliste mode & luxe." },
+        { role: "user", content: prompt }
+      ]
+    }, { headers: { Authorization: `Bearer ${process.env.OPENAI_API_KEY}` } });
+
+    const text = gpt.data.choices[0].message.content;
+
+    // 2️⃣ Ajout des flux RSS
+    const parser = require('rss-parser');
+    const feedurls = [
+      'https://www.vogue.com/feed/rss', // Vogue
+      'https://www.gq.com/rss/fashion',  // GQ
+      'https://www.vogue.co.uk/rss/fashion' // British Vogue
+    ];
+    const allItems = [];
+    const parserInstance = new parser();
+    for (let url of feedurls) {
+      const feed = await parserInstance.parseURL(url);
+      feed.items.forEach(item => {
+        const pub = item.pubDate;
+        if (pub && pub.startsWith(date)) {
+          allItems.push({ title: item.title, link: item.link });
+        }
+      });
+    }
+
+    res.json({ text, rss: allItems });
+
+  } catch(err) {
+    console.error("Erreur actus-date-rss :", err.message);
+    res.status(500).json({ error: "Erreur actus-mode-date." });
+  }
+});
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Serveur SELEZIONE lancé sur le port ${PORT}`);
