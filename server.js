@@ -383,7 +383,4 @@ res.json({
 const PORT = process.env.PORT || 3000; app.listen(PORT, () => console.log(🚀 Serveur scraping lancé sur ${PORT}));
 
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`🚀 Serveur SELEZIONE lancé sur le port ${PORT}`);
-});
+
