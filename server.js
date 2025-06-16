@@ -408,7 +408,10 @@ app.post("/scrape-vestiaire", async (req, res) => {
     res.status(500).json({ error: "Erreur lors du scraping." });
   }
 });
-const PORT = process.env.PORT || 3000; app.listen(PORT, () => console.log(🚀 Serveur scraping lancé sur ${PORT}));
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`🚀 Serveur scraping lancé sur le port ${PORT}`);
+});
 
 
 
