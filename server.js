@@ -325,7 +325,7 @@ app.post('/rss-luxe', async (req, res) => {
 });
 // Backend complet version "monstre" pour Scraper Vestiaire Collective
 
-const express = require("express"); const axios = require("axios"); const cheerio = require("cheerio"); const cors = require("cors"); const { Configuration, OpenAIApi } = require("openai"); require("dotenv").config();
+const cheerio = require("cheerio"); const { Configuration, OpenAIApi } = require("openai"); require("dotenv").config();
 
 const app = express(); app.use(cors()); app.use(express.json());
 
