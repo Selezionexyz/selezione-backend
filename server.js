@@ -327,7 +327,6 @@ app.post('/rss-luxe', async (req, res) => {
 
 const cheerio = require("cheerio"); const { Configuration, OpenAIApi } = require("openai"); require("dotenv").config();
 
-const app = express(); app.use(cors()); app.use(express.json());
 
 const configuration = new Configuration({ apiKey: process.env.OPENAI_API_KEY, }); const openai = new OpenAIApi(configuration);
 
