@@ -412,6 +412,44 @@ app.post("/scrape-vestiaire", async (req, res) => {
     res.status(500).json({ error: "Erreur lors du scraping." });
   }
 });
+// ... tes imports & config (express, cors, supabase, nodemailer, etc.)
+
+// Middleware
+app.use(cors());
+app.use(bodyParser.json());
+
+// 💾 Enregistrement commande (juste avant app.listen)
+app.post('/api/commande', async (req, res) => {
+  const { user, fichier, selections } = req.body;
+
+  try {
+    const { error } = await supabase
+      .from('commandes')
+      .insert({
+        user,
+        fichier,
+        selections,
+        created_at: new Date().toISOString(),
+      });
+
+    if (error) throw error;
+
+    await transporter.sendMail({
+      from: process.env.ADMIN_EMAIL,
+      to: process.env.ADMIN_EMAIL,
+      subject: `Nouvelle commande SELEZIONE de ${user}`,
+      html: `Fichier: ${fichier}<br><br>Commande:<br><pre>${JSON.stringify(selections, null, 2)}</pre>`,
+    });
+
+    res.status(200).json({ message: 'Commande enregistrée et notifiée avec succès.' });
+  } catch (err) {
+    console.error('Erreur commande :', err);
+    res.status(500).json({ error: 'Erreur lors de l’enregistrement de la commande.' });
+  }
+});
+
+// ✅ Fin du fichier
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Serveur scraping lancé sur le port ${PORT}`);
