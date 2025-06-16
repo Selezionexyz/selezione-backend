@@ -323,62 +323,91 @@ app.post('/rss-luxe', async (req, res) => {
     res.status(500).json({ error: "Erreur génération d’actualités." });
   }
 });
-// Backend complet version "monstre" pour Scraper Vestiaire Collective
+// ------------------------- MODULE 6 : Scraper Vestiaire Collective -------------------------
 
-const cheerio = require("cheerio"); const { Configuration, OpenAIApi } = require("openai"); require("dotenv").config();
+const cheerio = require("cheerio");
+const { Configuration, OpenAIApi } = require("openai");
+require("dotenv").config();
 
+const configuration = new Configuration({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+const openai = new OpenAIApi(configuration);
 
-const configuration = new Configuration({ apiKey: process.env.OPENAI_API_KEY, }); const openai = new OpenAIApi(configuration);
+// 📊 Utilitaire pour convertir les prix : "1 490 €" -> 1490
+function cleanPrice(priceStr) {
+  return parseFloat(priceStr.replace(/[\u20ac,\s]/g, "").replace(",", "."));
+}
 
-// Util: format price string like "1,490 €" => 1490 function cleanPrice(priceStr) { return parseFloat(priceStr.replace(/[\u20ac,\s]/g, "").replace(",", ".")); }
+// 🚀 Scraper Vestiaire Collective
+app.post("/scrape-vestiaire", async (req, res) => {
+  const { query } = req.body;
 
-// Scraper de Vestiaire Collective app.post("/scrape-vestiaire", async (req, res) => { const { query } = req.body; if (!query || query.length < 2) return res.status(400).json({ error: "Requête invalide." });
+  if (!query || query.length < 2) {
+    return res.status(400).json({ error: "Requête invalide." });
+  }
 
-try {const url = `https://www.vestiairecollective.com/search/?q=${encodeURIComponent(query)}`; const response = await axios.get(url, { headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36", }, });
+  try {
+    const url = `https://www.vestiairecollective.com/search/?q=${encodeURIComponent(query)}`;
+    const response = await axios.get(url, {
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+      },
+    });
 
-const $ = cheerio.load(response.data);
-const produits = [];
+    const $ = cheerio.load(response.data);
+    const produits = [];
 
-$("article").each((_, el) => {
-  const title = $(el).find(".product-title").text().trim();
-  const price = cleanPrice($(el).find(".product-price").text());
-  const link = "https://www.vestiairecollective.com" + $(el).find("a").attr("href");
-  if (title && price && link) {
-    produits.push({ title, price, link });
+    $("article").each((_, el) => {
+      const title = $(el).find(".product-title").text().trim();
+      const price = cleanPrice($(el).find(".product-price").text());
+      const link =
+        "https://www.vestiairecollective.com" + $(el).find("a").attr("href");
+
+      if (title && price && link) {
+        produits.push({ title, price, link });
+      }
+    });
+
+    if (produits.length === 0) {
+      return res.json({
+        produits: [],
+        resume: "Aucune donnée trouvée.",
+      });
+    }
+
+    // 🔢 Calcul des statistiques
+    const prices = produits.map((p) => p.price);
+    const min = Math.min(...prices);
+    const max = Math.max(...prices);
+    const avg = (prices.reduce((a, b) => a + b, 0) / prices.length).toFixed(2);
+
+    // 🧠 Appel à l'IA pour un résumé
+    const prompt = `Voici les données réelles de Vestiaire Collective pour le produit : ${query}\nPrix minimum : ${min}€\nPrix maximum : ${max}€\nPrix moyen : ${avg}€.\nFais une synthèse utile pour vendre intelligemment ce produit.`;
+
+    const ia = await openai.createChatCompletion({
+      model: "gpt-4-turbo",
+      messages: [
+        {
+          role: "system",
+          content:
+            "Tu es un expert du marché de la mode de luxe en ligne. Donne une analyse concise, utile, pour optimiser l'achat ou la revente du produit.",
+        },
+        { role: "user", content: prompt },
+      ],
+    });
+
+    res.json({
+      produits,
+      stats: { min, max, avg },
+      resume: ia.data.choices[0].message.content,
+    });
+  } catch (err) {
+    console.error("Erreur scraping Vestiaire:", err.message);
+    res.status(500).json({ error: "Erreur lors du scraping." });
   }
 });
-
-if (produits.length === 0) return res.json({ produits: [], resume: "Aucune donnée trouvée." });
-
-// Calcul des stats
-const prices = produits.map((p) => p.price);
-const min = Math.min(...prices);
-const max = Math.max(...prices);
-const avg = (prices.reduce((a, b) => a + b, 0) / prices.length).toFixed(2);
-
-// Estimation IA
-const prompt = `Voici les données réelles de Vestiaire Collective pour le produit : ${query}\nPrix minimum : ${min}€\nPrix maximum : ${max}€\nPrix moyen : ${avg}€.\nFais une synthèse utile pour vendre intelligemment ce produit.`;
-
-const ia = await openai.createChatCompletion({
-  model: "gpt-4-turbo",
-  messages: [
-    {
-      role: "system",
-      content:
-        "Tu es un expert du marché de la mode de luxe en ligne. Donne une analyse concise, utile, pour optimiser l'achat ou la revente du produit.",
-    },
-    { role: "user", content: prompt },
-  ],
-});
-
-res.json({
-  produits,
-  stats: { min, max, avg },
-  resume: ia.data.choices[0].message.content,
-});
-
-} catch (err) { console.error("Erreur scraping Vestiaire:", err.message); res.status(500).json({ error: "Erreur lors du scraping." }); } });
-
 const PORT = process.env.PORT || 3000; app.listen(PORT, () => console.log(🚀 Serveur scraping lancé sur ${PORT}));
 
 
