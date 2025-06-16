@@ -329,10 +329,11 @@ const cheerio = require("cheerio");
 const OpenAI = require("openai");
 require("dotenv").config();
 
-const configuration = new Configuration({
+const OpenAI = require("openai");
+
+const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
-const openai = new OpenAIApi(configuration);
 
 // 📊 Utilitaire pour convertir les prix : "1 490 €" -> 1490
 function cleanPrice(priceStr) {
