@@ -326,7 +326,7 @@ app.post('/rss-luxe', async (req, res) => {
 // ------------------------- MODULE 6 : Scraper Vestiaire Collective -------------------------
 
 const cheerio = require("cheerio");
-const { Configuration, OpenAIApi } = require("openai");
+const OpenAI = require("openai");
 require("dotenv").config();
 
 const configuration = new Configuration({
