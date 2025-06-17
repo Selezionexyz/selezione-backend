@@ -14,10 +14,7 @@ const app = express();
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 app.use(cors());
 app.use(bodyParser.json());
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+
 // --------------------- MODULE 1 : Assistant Luxe IA ---------------------
 app.post('/assistant-luxe', async (req, res) => {
   const { message, mode } = req.body;
