@@ -120,3 +120,4 @@ res.status(200).json({ message: 'Commande enregistrée.' });
 // --------------------- ROOT + SERVER --------------------- app.get('/', (req, res) => { res.send("Bienvenue sur l'API SELEZIONE ✨"); });
 
 const PORT = process.env.PORT || 3000; app.listen(PORT, () => { console.log(🚀 Serveur SELEZIONE en ligne sur le port ${PORT}); });
+
