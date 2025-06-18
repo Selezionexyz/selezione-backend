@@ -31,4 +31,3 @@ app.post("/scrape-vestiaire", async (req, res) => { const { query } = req.body; 
 // --------------------- ROOT --------------------- app.get('/', (req, res) => { res.send("Bienvenue sur l'API SELEZIONE ✨"); });
 
 const PORT = process.env.PORT || 3000; app.listen(PORT, () => { console.log(🚀 Serveur SELEZIONE en ligne sur le port ${PORT}); });
-
