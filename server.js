@@ -1,6 +1,7 @@
 // --------------------- IMPORTS --------------------- const express = require('express'); const bodyParser = require('body-parser'); const axios = require('axios'); const cors = require('cors'); const cheerio = require('cheerio'); const OpenAI = require('openai'); const RSSParser = require('rss-parser'); const nodemailer = require('nodemailer'); const { createClient } = require('@supabase/supabase-js'); const fs = require('fs'); const path = require('path'); require('dotenv').config();
 
 // --------------------- INIT --------------------- const app = express(); const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY }); app.use(cors()); app.use(bodyParser.json());
+console.log("✅ Le bon fichier server.js a été lancé !");
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
