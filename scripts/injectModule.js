@@ -36,6 +36,19 @@ fs.readFile(contentPath, 'utf8', (err, htmlContent) => {
       }
       console.log('✅ Modifications poussées vers GitHub.');
       console.log(stdout);
+      // === COMMIT + PUSH AUTOMATIQUE ===
+exec(`
+  cd ../../selezione-frontend && 
+  git add . && 
+  git commit -m "💾 Mise à jour module ${moduleNumber}" && 
+  git push
+`, (err, stdout, stderr) => {
+  if (err) {
+    console.error('❌ Erreur Git :', stderr);
+    process.exit(1);
+  }
+  console.log('🚀 Frontend mis à jour et push sur GitHub avec succès !');
+});
       console.error(stderr);
     });
   });
