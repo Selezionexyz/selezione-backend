@@ -3,15 +3,21 @@ name: Inject HTML & Deploy
 on:
   push:
     branches:
-      - main  # ou master, selon ton branche par défaut
+      - main
 
 jobs:
   inject-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 📥 Cloner le repo
+      - name: 🍰 Cloner le repo backend
         uses: actions/checkout@v3
+
+      - name: 🍰 Cloner le repo frontend
+        uses: actions/checkout@v3
+        with:
+          repository: Selezionexyz/selezione-frontend
+          path: selezione-frontend
 
       - name: 📦 Installer Node.js
         uses: actions/setup-node@v3
@@ -26,8 +32,9 @@ jobs:
 
       - name: 🚀 Déployer vers Render (ou autre)
         run: |
+          cd selezione-frontend
           git config user.name "github-actions"
           git config user.email "actions@github.com"
           git add .
-          git commit -m "Injection automatique via GitHub Action"
+          git commit -m "Injection automatique via GitHub Actions"
           git push
