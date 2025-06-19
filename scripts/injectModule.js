@@ -4,7 +4,7 @@ const { exec } = require('child_process');
 
 // === CONFIGURATION ===
 const moduleNumber = 1;
-const contentPath = path.join(__dirname, '../modules/modules/module1.html');
+const contentPath = path.join(__dirname, '../modules/module1.html');
 const outputPath = path.join(__dirname, `../../selezione-frontend/public/formation-selezione-${moduleNumber}.html`);
 
 // === LECTURE DU CONTENU ===
