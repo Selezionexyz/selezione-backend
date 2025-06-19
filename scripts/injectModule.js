@@ -19,7 +19,7 @@ fs.readFile(contentPath, 'utf8', (err, htmlContent) => {
     if (err) {
       console.error('Erreur écriture fichier HTML :', err);
       process.exit(1);
-    }
+    }.
 
     console.log(`✅ Module ${moduleNumber} injecté avec succès dans le frontend.`);
 
