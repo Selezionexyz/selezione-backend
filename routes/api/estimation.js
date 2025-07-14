@@ -5,7 +5,7 @@ const { OpenAI } = require('openai');
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 router.post('/', async (req, res) => {
-  const { query, etat } = req.body;
+  const { query, etat, marque } = req.body;
 
   if (!query) return res.status(400).json({ error: 'Requête manquante.' });
 
@@ -23,6 +23,7 @@ router.post('/', async (req, res) => {
         {
           role: 'user',
           content: `Produit : ${query}
+Marque : ${marque}
 État : ${etat === 'neuf' ? 'Neuf avec boîte' : 'Très bon état'}
 Format de réponse : JSON avec name, prixBoutique, revente, achat`
         }
