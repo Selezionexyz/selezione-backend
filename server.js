@@ -17,7 +17,8 @@ const app = express();
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 app.use(cors());
 app.use(bodyParser.json());
-
+const estimationRoute = require('./routes/api/estimation');
+app.use('/api/estimation', estimationRoute);
 // Supabase Client
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
